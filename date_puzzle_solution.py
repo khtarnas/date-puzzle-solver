@@ -15,15 +15,41 @@ board = [["jan", "feb", "mar", "apr", "may", "june"],
 
 solvable_board = [[0 for i in j] for j in board]
 
-# this may be easier to be done as a 3 x 3 matrix with 1s for yes and 0s for nos
-pieces = [["right", "down", "down", "right"],
-          ["right", "down", "down", "down"],
-          ["right", "down", "left", "down", "right"],
-          ["down", "right", "down", "down"],
-          ["right", "right", "down", "down"],
-          ["down", "down", "right", "left", "down"],  # this one is a bit difficult because it overlaps itself...
-          ["down", "right", "down", "left"],
-          ["right", "down", "down", "left"]]
+pieces = [
+    [[1, 1],
+     [1, 0],
+     [1, 1]],
+
+    [[1, 0],
+     [1, 1],
+     [1, 0],
+     [1, 0]],
+
+    [[1, 1],
+     [1, 0],
+     [1, 0],
+     [1, 0]],
+
+    [[1, 1, 1],
+     [1, 0, 0],
+     [1, 0, 0]],
+
+    [[1, 1],
+     [1, 1],
+     [1, 1]],
+
+    [[1, 0],
+     [1, 1],
+     [1, 1]],
+
+    [[1, 0],
+     [1, 1],
+     [0, 1],
+     [0, 1]],
+
+    [[1, 1, 0],
+     [0, 1, 0],
+     [0, 1, 1]]]
 
 # take command-line args
 input_month = sys.argv[1]
@@ -78,22 +104,69 @@ set_board(input_month, input_day)
 # ------------------------------------------- Solve the board! ---------------------------------------------------------
 
 
-def solve_board():
-    print(solvable_board)
+# TODO
+def placeable(start, piece, curr_board):
+    placed = False
+
+    # TODO
+    def attempt_placement(attempt_piece):
+        return False
+
+    # try all (of 4) rotations, transpose and try each rotation again
+    for i in range(8):
+        # try it
+        if attempt_placement(piece):
+            continue
+
+        # if it failed, rotate unless time to transpose
+        if i == 3:
+            piece = [[piece[j][i] for j in range(len(piece))] for i in range(len(piece[0]))]
+        else:
+            piece = [[piece[j][i] for j in range(len(piece))] for i in range(len(piece[0]) - 1, -1, -1)]
 
 
-# rotate each piece all four possible ways
+# TODO
+def place_piece(piece, curr_board):
+    print()
 
-# I need to make sure to NOT add the pieces to the completed board until after so that the overlapping piece doesn't
-# infinite fail
 
-solve_board()
+# TODO
+def start_pos(curr_board):
+    return 0, 0
+
+
+def solve_board(curr_board, curr_pieces):
+    start = start_pos(curr_board)
+    for idx, piece in enumerate(curr_pieces):
+        if placeable(start, piece, curr_board):
+
+            # remove piece from curr_pieces to recurse on
+            new_pieces = curr_pieces
+            del new_pieces[idx]
+
+            # if this was the last piece then just return
+            if len(new_pieces) == 0:
+                return
+            else:
+                # create a board with the piece placed down
+                new_board = place_piece(piece, curr_board)
+
+                # recurse and see if it is successful
+                sol = solve_board(new_board, new_pieces)
+
+                if sol[0]:  # sol[0] is a boolean representing success
+                    return [start, piece] + sol[1]  # sol[1] is the solution found on the recursion
+
+    # return a list of tuples (start pos, order of directions)
+    return
+
+
+solve_board(solvable_board, pieces)
 
 # ----------------------------------------------- Print the solution! --------------------------------------------------
 
 
 print("You asked for the solution for the date '" + input_month + " " + str(input_day) + "'. Here is the solution!")
-
 
 # Creating a turtle object(pen)
 pen = turtle.Turtle()
