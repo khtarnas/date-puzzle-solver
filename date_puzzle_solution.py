@@ -60,6 +60,7 @@ input_day = int(sys.argv[2])
 
 
 def set_board(month="NOT SET", day=-99):
+
     # set month (only if not set yet)
     month_set = False
     for idx, x in enumerate(board[0]):
@@ -125,37 +126,61 @@ def placeable(start, piece, curr_board):
             piece = [[piece[j][i] for j in range(len(piece))] for i in range(len(piece[0]) - 1, -1, -1)]
 
 
-# TODO
-def place_piece(piece, curr_board):
-    print()
+# Place a specified piece on the board (checking whether it should be done *should* be checked beforehand)
+def place_piece(start, piece, curr_board):
+    new_board = curr_board.copy()
+
+    # place a new piece on the board for every location the piece would be present
+    for idx, i in enumerate(piece):
+        for jdx, j in enumerate(i):
+            if j == 1:
+                new_board[start[0] + idx][start[1] + jdx] = 1
+
+    return new_board
 
 
-# TODO
+# Find the position closest to the top and the left that isn't yet marked
 def start_pos(curr_board):
-    return 0, 0
+
+    # iterate through and return the first position that isn't marked
+    for idx, i in enumerate(curr_board):
+        for jdx, j in enumerate(i):
+            if j == 0:
+                return idx, jdx
 
 
 def solve_board(curr_board, curr_pieces):
+
+    print(curr_board)
+
     start = start_pos(curr_board)
-    for idx, piece in enumerate(curr_pieces):
-        if placeable(start, piece, curr_board):
 
-            # remove piece from curr_pieces to recurse on
-            new_pieces = curr_pieces
-            del new_pieces[idx]
+    print(start)
 
-            # if this was the last piece then just return
-            if len(new_pieces) == 0:
-                return
-            else:
-                # create a board with the piece placed down
-                new_board = place_piece(piece, curr_board)
+    new_board = place_piece(start, curr_pieces[0], curr_board)
 
-                # recurse and see if it is successful
-                sol = solve_board(new_board, new_pieces)
+    print(new_board)
 
-                if sol[0]:  # sol[0] is a boolean representing success
-                    return [start, piece] + sol[1]  # sol[1] is the solution found on the recursion
+
+    # for idx, piece in enumerate(curr_pieces):
+    #     if placeable(start, piece, curr_board):
+    #
+    #         # remove piece from curr_pieces to recurse on
+    #         new_pieces = curr_pieces
+    #         del new_pieces[idx]
+    #
+    #         # if this was the last piece then just return
+    #         if len(new_pieces) == 0:
+    #             return
+    #         else:
+    #             # create a board with the piece placed down
+    #             new_board = place_piece(start, piece, curr_board)
+    #
+    #             # recurse and see if it is successful
+    #             sol = solve_board(new_board, new_pieces)
+    #
+    #             if sol[0]:  # sol[0] is a boolean representing success
+    #                 return [start, piece] + sol[1]  # sol[1] is the solution found on the recursion
 
     # return a list of tuples (start pos, order of directions)
     return
@@ -169,23 +194,23 @@ solve_board(solvable_board, pieces)
 print("You asked for the solution for the date '" + input_month + " " + str(input_day) + "'. Here is the solution!")
 
 # Creating a turtle object(pen)
-pen = turtle.Turtle()
+# pen = turtle.Turtle()
 
 
 # Defining method to draw a colored circle
 # with a dynamic radius
-def ring(col, rad):
-    # Set the fill
-    pen.fillcolor(col)
-
-    # Start filling the color
-    pen.begin_fill()
-
-    # Draw a circle
-    pen.circle(rad)
-
-    # Ending the filling of the color
-    pen.end_fill()
+# def ring(col, rad):
+#     # Set the fill
+#     pen.fillcolor(col)
+#
+#     # Start filling the color
+#     pen.begin_fill()
+#
+#     # Draw a circle
+#     pen.circle(rad)
+#
+#     # Ending the filling of the color
+#     pen.end_fill()
 
 
 ##########################Main Section#############################
@@ -197,8 +222,8 @@ def ring(col, rad):
 ###################################################################
 
 # Draw ears
-pen.up()
-pen.setpos(-35, 95)
-pen.down()
-ring("red", 25)
-pen.hideturtle()
+# pen.up()
+# pen.setpos(-35, 95)
+# pen.down()
+# ring("red", 25)
+# pen.hideturtle()
