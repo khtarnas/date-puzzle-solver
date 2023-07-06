@@ -4,16 +4,21 @@ from accessories.puzzle_solution_helpers import set_board, placeable, place_piec
 
 def solve_board(board, pieces, month, day):
     solvable_board = set_board(board, month, day)
-    solve_board_recurse(solvable_board, pieces, 0)
+    solution = solve_board_recurse(solvable_board, pieces, 0)
+    if solution[0]:
+        return solution[1]
+    else:
+        return "ERROR: SOLUTION UNABLE TO BE FOUND"
 
 
 def solve_board_recurse(curr_board, curr_pieces, depth):  # TODO: depth is only used for debugging
 
     # Get the start position
     start = start_pos(curr_board)
-    start_x = start[0]
-    start_y = start[1]
-    if bad_start(start, curr_board):  # TODO: this should likely be useless if the checking in placeable is effective
+    start_row = start[0]
+    start_col = start[1]
+    if bad_start(start, curr_board):  # TODO: this should likely be useless if the checking
+                                      #  in placeable is effective --- NOT RN THO!!! very useful
         return False, None
 
     # iterate through all possible pieces that could be placed
@@ -28,31 +33,34 @@ def solve_board_recurse(curr_board, curr_pieces, depth):  # TODO: depth is only 
 
         # try all (of 4) rotations, transpose and try each rotation again (recursing for each rotation)
         for i in range(8):
-            start_pos_moved = False  # a variable to represent whether the start pos was moved because of a rotation
 
-            if piece == [[1, 1], [0, 1], [0, 1], [0, 1]]:
-                print("we be here!")
-                print(depth)
+            # TODO DEBUGGING STUFF REMOVE
+            if piece == [[0, 1, 1], [0, 1, 0], [1, 1, 0]] and depth == 4:
+                print("hi")
 
-            if placeable((start_x, start_y), piece, curr_board):
-                # print("placeable!")
+            # if the piece only fits given moving the start position out of bounds, then continue to the next
+            if start_col >= 0:
+                if placeable((start_row, start_col), piece, curr_board):
+                    # print("placeable!")
 
-                # if this was the last piece then just return
-                if len(new_pieces) == 0:
-                    return True, []
-                else:
-                    # create a board with the piece placed down
-                    new_board = place_piece((start_x, start_y), piece, curr_board)
+                    # if this was the last piece then just return
+                    if len(new_pieces) == 0:
+                        return True, []
+                    else:
+                        # create a board with the piece placed down
+                        new_board = place_piece((start_row, start_col), piece, curr_board)
 
-                    # recurse and see if it is successful
-                    sol = solve_board_recurse(new_board, new_pieces, depth + 1)
+                        # recurse and see if it is successful
+                        sol = solve_board_recurse(new_board, new_pieces, depth + 1)
 
-                    # print(sol)
-                    if sol[0]:  # sol[0] is a boolean representing success
-                        print("SUCCESSFUL!")
-                        return [(start_x, start_y), piece] + sol[1]  # sol[1] is the solution found on the recursion
+                        if sol[0]:  # sol[0] is a boolean representing success
+                            print("SUCCESSFUL!")
+                            print(sol[1])
 
-                    # else, just continue on to the next attempt
+                            # sol[1] is the solution found on the recursion
+                            return True, [(start_row, start_col), piece] + sol[1]
+
+                        # else, just continue on to the next attempt
 
             # if it failed, rotate unless time to transpose
             if i == 3:
@@ -60,14 +68,19 @@ def solve_board_recurse(curr_board, curr_pieces, depth):  # TODO: depth is only 
             else:
                 piece = [[piece[j][i] for j in range(len(piece))] for i in range(len(piece[0]) - 1, -1, -1)]
 
-            # only do this if we aren't at the far left
-            if start_pos(curr_board)[0] != 0:
-
-                # if the top left part of the piece is empty then move it
+            # move the start position to the left until the left most 1 on the top row of the piece is at the start pos
+            # this will move the start position to be negative at times, we will skip that above
+                # TODO: this can probably be cleaned up
                 if piece[0][0] == 0:
-                    start_x = start_pos(curr_board)[0] - 1
+                    if piece[0][1] == 0:
+                        if piece[0][2] == 0:
+                            start_col = start_pos(curr_board)[1] - 3
+                        else:
+                            start_col = start_pos(curr_board)[1] - 2
+                    else:
+                        start_col = start_pos(curr_board)[1] - 1
                 else:
-                    start_x = start_pos(curr_board)[0]
+                    start_col = start_pos(curr_board)[1]
 
     # If we reach this point, there was no solution found
     # note: this should NOT happen on the top layer, but SHOULD happen on lower levels
